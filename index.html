@@ -868,30 +868,6 @@ $("btnPDF").onclick=()=>{
   if($("filtroRegiao").value) f.push("Região: "+$("filtroRegiao").value);
   f.push("Gerado em "+new Date().toLocaleString("pt-BR")+" por "+usuarioAtual.nome);
   doc.text(f.join("  |  "),14,23);
-  // produtividade por tipo
-  const porTipo={};
-  let totalTempoVisita=0;
-  vs.forEach(v=>{
-    if(!porTipo[v.tipo]) porTipo[v.tipo]={qtd:0,tempo:0};
-    porTipo[v.tipo].qtd++;
-    porTipo[v.tipo].tempo+=(v.tempoVisitaMin||0);
-    totalTempoVisita+=(v.tempoVisitaMin||0);
-  });
-  const tiposOrd=Object.entries(porTipo).sort((a,b)=>b[1].qtd-a[1].qtd);
-  $("tabelaProdutividade").innerHTML = tiposOrd.length
-    ? '<table class="tabelaRank"><tr><th>Tipo</th><th>Visitas</th><th>% visitas</th><th>Tempo</th><th>% tempo</th></tr>'
-      + tiposOrd.map(t=>'<tr><td><b>'+escapaHTML(t[0])+'</b></td><td>'+t[1].qtd+'</td><td><b>'+Math.round(t[1].qtd/vs.length*100)+'%</b></td><td>'+fmtMin(t[1].tempo)+'</td><td>'+(totalTempoVisita?Math.round(t[1].tempo/totalTempoVisita*100):0)+'%</td></tr>').join("")
-      +'</table>'
-    : '<div class="vazio">Sem visitas no período.</div>';
-  // resultados
-  const porResultado={};
-  vs.forEach(v=>{ const r=v.resultado||"Não informado"; porResultado[r]=(porResultado[r]||0)+1; });
-  const resOrd=Object.entries(porResultado).sort((a,b)=>b[1]-a[1]);
-  $("tabelaResultados").innerHTML = resOrd.length
-    ? '<table class="tabelaRank"><tr><th>Resultado</th><th>Visitas</th><th>%</th></tr>'
-      + resOrd.map(r=>'<tr><td><b>'+escapaHTML(r[0])+'</b></td><td>'+r[1]+'</td><td><b>'+Math.round(r[1]/vs.length*100)+'%</b></td></tr>').join("")
-      +'</table>'
-    : '<div class="vazio">Sem visitas no período.</div>';
   // ranking
   const porPessoa={};
   cacheDash.forEach(v=>{porPessoa[v.nome]=(porPessoa[v.nome]||0)+1;});
