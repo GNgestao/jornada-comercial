@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Jornada Comercial</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --roxo:#7B2FBE;
+  --roxo-escuro:#5A1F8E;
+  --laranja:#E84A1A;
+  --grad:linear-gradient(135deg,#7B2FBE 0%,#B0379C 55%,#E84A1A 100%);
+  --fundo:#F6F4FA;
+  --card:#FFFFFF;
+  --texto:#2A2333;
+  --texto-suave:#7A7287;
+  --borda:#E7E2F0;
+  --verde:#1E9E5A;
+  --vermelho:#D33C3C;
+  --raio:16px;
+  --sombra:0 2px 12px rgba(60,30,100,.08);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Inter',sans-serif;background:var(--fundo);color:var(--texto);min-height:100vh;font-size:15px}
+h1,h2,h3,.display{font-family:'Sora',sans-serif}
+button{font-family:'Inter',sans-serif;cursor:pointer;border:none}
+input,select,textarea{font-family:'Inter',sans-serif;font-size:15px;width:100%;padding:13px 14px;border:1.5px solid var(--borda);border-radius:12px;background:#fff;color:var(--texto);outline:none;transition:border .15s}
+input:focus,select:focus,textarea:focus{border-color:var(--roxo)}
+label{display:block;font-size:13px;font-weight:600;color:var(--texto-suave);margin:14px 0 6px}
+.hidden{display:none!important}
+
+/* ---------- TELA DE LOGIN ---------- */
+#telaAuth{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--grad);padding:24px}
+.cartaoAuth{background:#fff;border-radius:22px;padding:30px 26px;width:100%;max-width:400px;box-shadow:0 16px 48px rgba(40,10,70,.35)}
+.logoApp{text-align:center;margin-bottom:8px}
+.logoApp .marca{font-family:'Sora',sans-serif;font-weight:800;font-size:26px;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:-.5px}
+.logoApp .sub{font-size:13px;color:var(--texto-suave);margin-top:2px}
+.btnPrincipal{width:100%;padding:15px;border-radius:13px;background:var(--grad);color:#fff;font-weight:700;font-size:15.5px;margin-top:20px;transition:opacity .15s}
+.btnPrincipal:active{opacity:.85}
+.btnPrincipal:disabled{opacity:.55}
+.linkTroca{display:block;text-align:center;margin-top:16px;font-size:14px;color:var(--roxo);font-weight:600;background:none}
+.msgErro{background:#FDECEC;color:var(--vermelho);border-radius:10px;padding:10px 12px;font-size:13.5px;margin-top:14px;display:none}
+.msgOk{background:#E8F7EF;color:var(--verde);border-radius:10px;padding:10px 12px;font-size:13.5px;margin-top:14px;display:none}
+
+/* ---------- APP SHELL ---------- */
+#app{padding-bottom:86px}
+.cabecalho{background:var(--grad);padding:18px 20px 22px;border-radius:0 0 26px 26px;color:#fff;position:sticky;top:0;z-index:20}
+.cabecalho .linha{display:flex;justify-content:space-between;align-items:center}
+.cabecalho .marca{font-family:'Sora',sans-serif;font-weight:800;font-size:19px;letter-spacing:-.3px}
+.cabecalho .usuario{font-size:12.5px;opacity:.92;margin-top:3px}
+.btnSair{background:rgba(255,255,255,.18);color:#fff;border-radius:10px;padding:8px 14px;font-size:13px;font-weight:600}
+.conteudo{padding:18px 16px;max-width:760px;margin:0 auto}
+
+/* ---------- NAV INFERIOR ---------- */
+.navInferior{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--borda);display:flex;z-index:30;padding-bottom:env(safe-area-inset-bottom)}
+.navItem{flex:1;padding:10px 4px 12px;text-align:center;background:none;color:var(--texto-suave);font-size:11px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:3px}
+.navItem .icone{font-size:20px;line-height:1}
+.navItem.ativo{color:var(--roxo)}
+
+/* ---------- CARTÕES ---------- */
+.cartao{background:var(--card);border-radius:var(--raio);padding:18px;box-shadow:var(--sombra);margin-bottom:14px}
+.tituloSecao{font-size:17px;font-weight:700;margin-bottom:12px}
+.subtitulo{font-size:13px;color:var(--texto-suave)}
+
+/* ---------- VISITA ATIVA ---------- */
+.faixaStatus{display:inline-block;padding:5px 12px;border-radius:999px;font-size:12px;font-weight:700;letter-spacing:.3px}
+.faixaStatus.desloc{background:#F3E8FF;color:var(--roxo)}
+.faixaStatus.visita{background:#FFEDE5;color:var(--laranja)}
+.faixaStatus.fim{background:#E8F7EF;color:var(--verde)}
+.cronometro{font-family:'Sora',sans-serif;font-size:42px;font-weight:800;text-align:center;margin:14px 0 4px;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.legendaCrono{text-align:center;font-size:13px;color:var(--texto-suave);margin-bottom:16px}
+.infoLinha{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--borda);font-size:14px}
+.infoLinha:last-child{border-bottom:none}
+.infoLinha .rotulo{color:var(--texto-suave)}
+.infoLinha .valor{font-weight:600;text-align:right;max-width:60%}
+.btnAcao{width:100%;padding:15px;border-radius:13px;font-weight:700;font-size:15.5px;margin-top:14px;color:#fff}
+.btnAcao.roxo{background:var(--grad)}
+.btnAcao.verde{background:var(--verde)}
+.btnAcao.cinza{background:#EFEAF6;color:var(--roxo)}
+.btnAcao.vermelhoClaro{background:#FDECEC;color:var(--vermelho)}
+.btnAcao:active{opacity:.85}
+.btnAcao:disabled{opacity:.55}
+
+/* ---------- HISTÓRICO / LISTAS ---------- */
+.itemVisita{background:var(--card);border-radius:var(--raio);padding:15px 16px;box-shadow:var(--sombra);margin-bottom:10px}
+.itemVisita .topo{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.itemVisita .predio{font-weight:700;font-size:15px}
+.itemVisita .meta{font-size:12.5px;color:var(--texto-suave);margin-top:4px;line-height:1.6}
+.etiquetaTipo{display:inline-block;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;background:#F3E8FF;color:var(--roxo);white-space:nowrap}
+.linkMapa{color:var(--roxo);font-weight:600;font-size:12.5px;text-decoration:none}
+
+/* ---------- DASHBOARD ---------- */
+.gradeFiltros{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.gradeFiltros .cheio{grid-column:1/-1}
+.cartaoNumero{flex:1;background:var(--card);border-radius:var(--raio);padding:14px;box-shadow:var(--sombra);text-align:center}
+.cartaoNumero .num{font-family:'Sora',sans-serif;font-size:26px;font-weight:800;color:var(--roxo)}
+.cartaoNumero .rot{font-size:11.5px;color:var(--texto-suave);font-weight:600;margin-top:2px}
+.linhaNumeros{display:flex;gap:10px;margin-bottom:14px}
+.tabelaRank{width:100%;border-collapse:collapse;font-size:13.5px}
+.tabelaRank th{text-align:left;color:var(--texto-suave);font-size:11.5px;text-transform:uppercase;letter-spacing:.4px;padding:8px 6px;border-bottom:1.5px solid var(--borda)}
+.tabelaRank td{padding:10px 6px;border-bottom:1px solid var(--borda)}
+.tabelaRank tr:last-child td{border-bottom:none}
+.posRank{display:inline-flex;width:24px;height:24px;border-radius:50%;background:var(--grad);color:#fff;font-weight:700;font-size:12px;align-items:center;justify-content:center}
+
+/* ---------- EQUIPE ---------- */
+.itemUsuario{display:flex;justify-content:space-between;align-items:center;padding:13px 0;border-bottom:1px solid var(--borda);gap:10px;flex-wrap:wrap}
+.itemUsuario:last-child{border-bottom:none}
+.itemUsuario .nome{font-weight:700;font-size:14.5px}
+.itemUsuario .detalhe{font-size:12px;color:var(--texto-suave);margin-top:2px}
+.etiquetaPapel{display:inline-block;padding:3px 10px;border-radius:999px;font-size:10.5px;font-weight:700;letter-spacing:.3px}
+.etiquetaPapel.superadmin{background:var(--grad);color:#fff}
+.etiquetaPapel.admin{background:#FFEDE5;color:var(--laranja)}
+.etiquetaPapel.membro{background:#EFEAF6;color:var(--roxo)}
+.etiquetaPapel.inativo{background:#EEE;color:#888}
+.btnMini{padding:7px 12px;border-radius:9px;font-size:12px;font-weight:700;background:#EFEAF6;color:var(--roxo)}
+.btnMini.perigo{background:#FDECEC;color:var(--vermelho)}
+.acoesUsuario{display:flex;gap:6px;flex-wrap:wrap}
+
+/* ---------- TOAST / MODAL ---------- */
+#toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#2A2333;color:#fff;padding:12px 20px;border-radius:12px;font-size:13.5px;font-weight:600;z-index:99;display:none;max-width:90%;text-align:center}
+#sobreposicao{position:fixed;inset:0;background:rgba(20,8,35,.55);z-index:50;display:none;align-items:flex-end;justify-content:center}
+#sobreposicao.aberto{display:flex}
+.modal{background:#fff;border-radius:22px 22px 0 0;padding:24px 20px 30px;width:100%;max-width:560px;max-height:88vh;overflow-y:auto}
+.modal h3{font-size:17px;margin-bottom:4px}
+.carregando{text-align:center;padding:30px;color:var(--texto-suave);font-size:14px}
+.vazio{text-align:center;padding:34px 16px;color:var(--texto-suave);font-size:14px;line-height:1.6}
+.vazio .iconeGrande{font-size:38px;margin-bottom:8px}
+@media(min-width:600px){
+  #sobreposicao{align-items:center}
+  .modal{border-radius:22px}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ TELA DE LOGIN / CADASTRO ============ -->
+<div id="telaAuth">
+  <div class="cartaoAuth">
+    <div class="logoApp">
+      <div class="marca">Jornada Comercial</div>
+      <div class="sub">Gestão de visitas do time comercial</div>
+    </div>
+
+    <!-- LOGIN -->
+    <div id="formLogin">
+      <label>E-mail</label>
+      <input type="email" id="loginEmail" placeholder="seu@email.com" autocomplete="email">
+      <label>Senha</label>
+      <input type="password" id="loginSenha" placeholder="••••••••" autocomplete="current-password">
+      <button class="btnPrincipal" id="btnEntrar">Entrar</button>
+      <button class="linkTroca" id="irCadastro">Não tem conta? Cadastre-se</button>
+    </div>
+
+    <!-- CADASTRO -->
+    <div id="formCadastro" class="hidden">
+      <label>Nome completo</label>
+      <input type="text" id="cadNome" placeholder="Seu nome">
+      <label>Função</label>
+      <select id="cadFuncao">
+        <option value="Vendedor">Vendedor</option>
+        <option value="Consultor">Consultor</option>
+      </select>
+      <label>Região</label>
+      <select id="cadRegiao">
+        <option value="Recife">Recife</option>
+        <option value="Paraíba">Paraíba</option>
+        <option value="Alagoas">Alagoas</option>
+      </select>
+      <label>E-mail</label>
+      <input type="email" id="cadEmail" placeholder="seu@email.com" autocomplete="email">
+      <label>Senha (mínimo 6 caracteres)</label>
+      <input type="password" id="cadSenha" placeholder="••••••••" autocomplete="new-password">
+      <button class="btnPrincipal" id="btnCadastrar">Criar conta</button>
+      <button class="linkTroca" id="irLogin">Já tem conta? Entrar</button>
+    </div>
+
+    <div class="msgErro" id="authErro"></div>
+    <div class="msgOk" id="authOk"></div>
+  </div>
+</div>
+
+<!-- ============ APP ============ -->
+<div id="app" class="hidden">
+  <div class="cabecalho">
+    <div class="linha">
+      <div>
+        <div class="marca">Jornada Comercial</div>
+        <div class="usuario" id="cabUsuario"></div>
+      </div>
+      <button class="btnSair" id="btnSair">Sair</button>
+    </div>
+  </div>
+
+  <div class="conteudo">
+
+    <!-- ===== ABA VISITA ===== -->
+    <div id="abaVisita">
+      <!-- Nova visita -->
+      <div class="cartao" id="cartaoNova">
+        <div class="tituloSecao">Nova visita</div>
+        <label>Nome do prédio / cliente</label>
+        <input type="text" id="visPredio" placeholder="Ex: Edf. Maria Eduarda">
+        <label>Tipo da visita</label>
+        <select id="visTipo">
+          <option value="Primeira Contratação">Primeira Contratação</option>
+          <option value="Resgate">Resgate</option>
+          <option value="Captação">Captação</option>
+          <option value="Renegociação">Renegociação</option>
+          <option value="Visita Periódica">Visita Periódica</option>
+          <option value="Outros">Outros</option>
+        </select>
+        <button class="btnAcao roxo" id="btnIniciar">📍 Iniciar deslocamento</button>
+        <div class="subtitulo" style="margin-top:10px;text-align:center">Sua localização de saída será registrada automaticamente.</div>
+      </div>
+
+      <!-- Visita ativa -->
+      <div class="cartao hidden" id="cartaoAtiva">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div class="tituloSecao" style="margin-bottom:0" id="ativaPredio"></div>
+          <span class="faixaStatus desloc" id="ativaStatus">Em deslocamento</span>
+        </div>
+        <div class="cronometro" id="cronometro">00:00</div>
+        <div class="legendaCrono" id="legendaCrono">tempo de deslocamento</div>
+        <div id="ativaInfo"></div>
+        <button class="btnAcao verde" id="btnCheguei">✅ Cheguei ao local</button>
+        <button class="btnAcao roxo hidden" id="btnFinalizar">🏁 Finalizar visita</button>
+        <button class="btnAcao vermelhoClaro" id="btnCancelar">Cancelar visita</button>
+      </div>
+
+      <!-- Resumo do dia -->
+      <div class="cartao">
+        <div class="tituloSecao">Hoje</div>
+        <div id="listaHoje" class="vazio">Nenhuma visita finalizada hoje.</div>
+      </div>
+    </div>
+
+    <!-- ===== ABA HISTÓRICO ===== -->
+    <div id="abaHistorico" class="hidden">
+      <div class="tituloSecao" style="margin-bottom:12px">Minhas visitas</div>
+      <div id="listaHistorico" class="carregando">Carregando...</div>
+    </div>
+
+    <!-- ===== ABA DASHBOARD (admin) ===== -->
+    <div id="abaDashboard" class="hidden">
+      <div class="cartao">
+        <div class="tituloSecao">Filtros</div>
+        <div class="gradeFiltros">
+          <div><label>De</label><input type="date" id="filtroDe"></div>
+          <div><label>Até</label><input type="date" id="filtroAte"></div>
+          <div><label>Pessoa</label><select id="filtroPessoa"><option value="">Todas</option></select></div>
+          <div><label>Tipo</label><select id="filtroTipo">
+            <option value="">Todos</option>
+            <option>Primeira Contratação</option><option>Resgate</option><option>Captação</option>
+            <option>Renegociação</option><option>Visita Periódica</option><option>Outros</option>
+          </select></div>
+          <div><label>Região</label><select id="filtroRegiao">
+            <option value="">Todas</option><option>Recife</option><option>Paraíba</option><option>Alagoas</option>
+          </select></div>
+          <div style="display:flex;align-items:flex-end"><button class="btnAcao cinza" style="margin-top:0" id="btnAplicar">Aplicar</button></div>
+        </div>
+        <button class="btnAcao roxo" id="btnPDF">📄 Exportar PDF</button>
+      </div>
+
+      <div class="linhaNumeros">
+        <div class="cartaoNumero"><div class="num" id="numTotal">0</div><div class="rot">Visitas</div></div>
+        <div class="cartaoNumero"><div class="num" id="numDesloc">0m</div><div class="rot">Médio deslocamento</div></div>
+        <div class="cartaoNumero"><div class="num" id="numVisita">0m</div><div class="rot">Médio em visita</div></div>
+      </div>
+
+      <div class="cartao">
+        <div class="tituloSecao">🏆 Ranking</div>
+        <div id="tabelaRanking"></div>
+      </div>
+
+      <div class="cartao">
+        <div class="tituloSecao">Visitas no período</div>
+        <div id="listaDash" class="carregando">Aplique os filtros para carregar.</div>
+      </div>
+    </div>
+
+    <!-- ===== ABA EQUIPE (admin) ===== -->
+    <div id="abaEquipe" class="hidden">
+      <div class="cartao">
+        <div class="tituloSecao">Equipe</div>
+        <div class="subtitulo" style="margin-bottom:8px">Novos integrantes se cadastram pela tela de login. Aqui você gerencia papéis e acessos.</div>
+        <div id="listaEquipe" class="carregando">Carregando...</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- NAV -->
+  <div class="navInferior">
+    <button class="navItem ativo" data-aba="abaVisita"><span class="icone">📍</span>Visita</button>
+    <button class="navItem" data-aba="abaHistorico"><span class="icone">🗂️</span>Histórico</button>
+    <button class="navItem hidden adminSo" data-aba="abaDashboard"><span class="icone">📊</span>Dashboard</button>
+    <button class="navItem hidden adminSo" data-aba="abaEquipe"><span class="icone">👥</span>Equipe</button>
+  </div>
+</div>
+
+<!-- MODAL FINALIZAR -->
+<div id="sobreposicao">
+  <div class="modal">
+    <h3>Finalizar visita</h3>
+    <div class="subtitulo" id="modalPredio"></div>
+    <label>Tipo da visita</label>
+    <select id="fimTipo">
+      <option value="Primeira Contratação">Primeira Contratação</option>
+      <option value="Resgate">Resgate</option>
+      <option value="Captação">Captação</option>
+      <option value="Renegociação">Renegociação</option>
+      <option value="Visita Periódica">Visita Periódica</option>
+      <option value="Outros">Outros</option>
+    </select>
+    <label>Observações</label>
+    <textarea id="fimObs" rows="4" placeholder="Ex: Falei com o síndico, ficou de retornar semana que vem..."></textarea>
+    <button class="btnAcao roxo" id="btnConfirmarFim">Confirmar e finalizar</button>
+    <button class="btnAcao cinza" id="btnFecharModal">Voltar</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script>
+/* ================= CONFIGURAÇÃO ================= */
+const firebaseConfig = {
+  apiKey: "AIzaSyDyszR3OIEnsbLYNBEeX5ooE7np9TJDEnY",
+  authDomain: "gn-gestao.firebaseapp.com",
+  projectId: "gn-gestao",
+  storageBucket: "gn-gestao.firebasestorage.app",
+  messagingSenderId: "921732753600",
+  appId: "1:921732753600:web:c45f44fde1a9f11a296525"
+};
+const SUPERADMIN_EMAIL = "gabrielnascimento1995@gmail.com";
+const COL_USUARIOS = "jc_usuarios";
+const COL_VISITAS = "jc_visitas";
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+let usuarioAtual = null;     // doc do jc_usuarios
+let visitaAtiva = null;      // {id, ...dados}
+let intervaloCrono = null;
+let cacheDash = [];          // visitas carregadas no dashboard
+
+/* ================= HELPERS ================= */
+const $ = id => document.getElementById(id);
+function toast(msg){ const t=$("toast"); t.textContent=msg; t.style.display="block"; setTimeout(()=>t.style.display="none",3200); }
+function erroAuth(msg){ const e=$("authErro"); e.textContent=msg; e.style.display="block"; setTimeout(()=>e.style.display="none",6000); }
+function okAuth(msg){ const e=$("authOk"); e.textContent=msg; e.style.display="block"; setTimeout(()=>e.style.display="none",6000); }
+function fmtHora(ms){ return new Date(ms).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"}); }
+function fmtData(ms){ return new Date(ms).toLocaleDateString("pt-BR"); }
+function fmtMin(min){ if(min==null)return "—"; if(min<60)return min+" min"; const h=Math.floor(min/60); return h+"h "+(min%60)+"min"; }
+function diaISO(ms){ const d=new Date(ms); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function escapaHTML(s){ return (s||"").replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function linkMaps(lat,lng){ return "https://www.google.com/maps?q="+lat+","+lng; }
+
+function pegarPosicao(){
+  return new Promise((res,rej)=>{
+    if(!navigator.geolocation) return rej(new Error("Geolocalização não disponível neste aparelho."));
+    navigator.geolocation.getCurrentPosition(
+      p=>res({lat:p.coords.latitude,lng:p.coords.longitude}),
+      e=>rej(new Error("Não consegui obter sua localização. Verifique se o GPS está ativo e a permissão concedida.")),
+      {enableHighAccuracy:true,timeout:15000,maximumAge:10000}
+    );
+  });
+}
+async function enderecoAprox(lat,lng){
+  try{
+    const r = await fetch("https://nominatim.openstreetmap.org/reverse?format=json&lat="+lat+"&lon="+lng+"&zoom=17&accept-language=pt-BR");
+    const j = await r.json();
+    if(j && j.address){
+      const a=j.address;
+      const rua=a.road||a.pedestrian||a.neighbourhood||"";
+      const bairro=a.suburb||a.neighbourhood||a.city_district||"";
+      const cidade=a.city||a.town||a.municipality||"";
+      return [rua,bairro,cidade].filter(Boolean).join(", ") || (lat.toFixed(5)+", "+lng.toFixed(5));
+    }
+  }catch(e){}
+  return lat.toFixed(5)+", "+lng.toFixed(5);
+}
+
+/* ================= AUTENTICAÇÃO ================= */
+$("irCadastro").onclick=()=>{$("formLogin").classList.add("hidden");$("formCadastro").classList.remove("hidden");};
+$("irLogin").onclick=()=>{$("formCadastro").classList.add("hidden");$("formLogin").classList.remove("hidden");};
+
+$("btnEntrar").onclick=async()=>{
+  const email=$("loginEmail").value.trim(), senha=$("loginSenha").value;
+  if(!email||!senha) return erroAuth("Preencha e-mail e senha.");
+  $("btnEntrar").disabled=true;
+  try{ await auth.signInWithEmailAndPassword(email,senha); }
+  catch(e){ erroAuth(traduzErro(e)); }
+  $("btnEntrar").disabled=false;
+};
+
+$("btnCadastrar").onclick=async()=>{
+  const nome=$("cadNome").value.trim(), email=$("cadEmail").value.trim(), senha=$("cadSenha").value;
+  const funcao=$("cadFuncao").value, regiao=$("cadRegiao").value;
+  if(!nome||!email||!senha) return erroAuth("Preencha todos os campos.");
+  $("btnCadastrar").disabled=true;
+  try{
+    const cred = await auth.createUserWithEmailAndPassword(email,senha);
+    const papel = (email.toLowerCase()===SUPERADMIN_EMAIL) ? "superadmin" : "membro";
+    await db.collection(COL_USUARIOS).doc(cred.user.uid).set({
+      nome, email:email.toLowerCase(), funcao, regiao, papel, ativo:true,
+      criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    okAuth("Conta criada!");
+  }catch(e){ erroAuth(traduzErro(e)); }
+  $("btnCadastrar").disabled=false;
+};
+
+function traduzErro(e){
+  const c=e.code||"";
+  if(c.includes("invalid-credential")||c.includes("wrong-password")||c.includes("user-not-found")) return "E-mail ou senha incorretos.";
+  if(c.includes("email-already-in-use")) return "Este e-mail já está cadastrado.";
+  if(c.includes("weak-password")) return "Senha muito fraca (mínimo 6 caracteres).";
+  if(c.includes("invalid-email")) return "E-mail inválido.";
+  if(c.includes("too-many-requests")) return "Muitas tentativas. Aguarde um pouco.";
+  return "Erro: "+(e.message||c);
+}
+
+$("btnSair").onclick=()=>auth.signOut();
+
+auth.onAuthStateChanged(async user=>{
+  if(!user){
+    usuarioAtual=null; pararCrono();
+    $("app").classList.add("hidden"); $("telaAuth").style.display="flex";
+    return;
+  }
+  // carrega/garante doc do usuário
+  const ref = db.collection(COL_USUARIOS).doc(user.uid);
+  let doc = await ref.get();
+  if(!doc.exists){
+    const papel = (user.email.toLowerCase()===SUPERADMIN_EMAIL) ? "superadmin" : "membro";
+    await ref.set({nome:user.email.split("@")[0], email:user.email.toLowerCase(), funcao:"Consultor", regiao:"Recife", papel, ativo:true,
+      criadoEm: firebase.firestore.FieldValue.serverTimestamp()});
+    doc = await ref.get();
+  }
+  usuarioAtual = {uid:user.uid, ...doc.data()};
+  if(usuarioAtual.email===SUPERADMIN_EMAIL && usuarioAtual.papel!=="superadmin"){
+    await ref.update({papel:"superadmin"}); usuarioAtual.papel="superadmin";
+  }
+  if(usuarioAtual.ativo===false || usuarioAtual.excluido===true){
+    alert("Seu acesso foi desativado. Fale com o administrador.");
+    return auth.signOut();
+  }
+  iniciarApp();
+});
+
+function ehAdmin(){ return usuarioAtual && (usuarioAtual.papel==="admin"||usuarioAtual.papel==="superadmin"); }
+function ehSuper(){ return usuarioAtual && usuarioAtual.papel==="superadmin"; }
+
+/* ================= APP ================= */
+async function iniciarApp(){
+  $("telaAuth").style.display="none";
+  $("app").classList.remove("hidden");
+  $("cabUsuario").textContent = usuarioAtual.nome+" · "+usuarioAtual.funcao+" · "+usuarioAtual.regiao+(ehSuper()?" · SUPERADMIN":(ehAdmin()?" · ADMIN":""));
+  document.querySelectorAll(".adminSo").forEach(el=>el.classList.toggle("hidden",!ehAdmin()));
+  // datas padrão dashboard: mês atual
+  const hoje=new Date();
+  $("filtroDe").value = hoje.getFullYear()+"-"+String(hoje.getMonth()+1).padStart(2,"0")+"-01";
+  $("filtroAte").value = diaISO(Date.now());
+  await recuperarVisitaAtiva();
+  carregarHoje();
+}
+
+/* navegação */
+document.querySelectorAll(".navItem").forEach(btn=>{
+  btn.onclick=()=>{
+    document.querySelectorAll(".navItem").forEach(b=>b.classList.remove("ativo"));
+    btn.classList.add("ativo");
+    ["abaVisita","abaHistorico","abaDashboard","abaEquipe"].forEach(a=>$(a).classList.add("hidden"));
+    $(btn.dataset.aba).classList.remove("hidden");
+    if(btn.dataset.aba==="abaHistorico") carregarHistorico();
+    if(btn.dataset.aba==="abaDashboard"){ carregarPessoasFiltro(); aplicarFiltros(); }
+    if(btn.dataset.aba==="abaEquipe") carregarEquipe();
+  };
+});
+
+/* ================= CICLO DA VISITA ================= */
+async function recuperarVisitaAtiva(){
+  const snap = await db.collection(COL_VISITAS).where("uid","==",usuarioAtual.uid).get();
+  let ativa=null;
+  snap.forEach(d=>{ const v=d.data(); if(v.status==="deslocamento"||v.status==="em_visita") ativa={id:d.id,...v}; });
+  visitaAtiva=ativa;
+  renderVisitaAtiva();
+}
+
+$("btnIniciar").onclick=async()=>{
+  const predio=$("visPredio").value.trim();
+  if(!predio) return toast("Informe o nome do prédio/cliente.");
+  $("btnIniciar").disabled=true; $("btnIniciar").textContent="Obtendo localização...";
+  try{
+    const pos = await pegarPosicao();
+    const agora = Date.now();
+    const dados = {
+      uid:usuarioAtual.uid, nome:usuarioAtual.nome, funcao:usuarioAtual.funcao, regiao:usuarioAtual.regiao,
+      predio, tipo:$("visTipo").value, observacoes:"",
+      status:"deslocamento",
+      inicio:agora, inicioLat:pos.lat, inicioLng:pos.lng, inicioEnd:"",
+      chegada:null, chegadaLat:null, chegadaLng:null, chegadaEnd:"",
+      fim:null, tempoDeslocMin:null, tempoVisitaMin:null,
+      dataDia: diaISO(agora),
+      criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+    };
+    const ref = await db.collection(COL_VISITAS).add(dados);
+    visitaAtiva={id:ref.id,...dados};
+    renderVisitaAtiva();
+    toast("Deslocamento iniciado! Boa visita 🚀");
+    enderecoAprox(pos.lat,pos.lng).then(end=>{ db.collection(COL_VISITAS).doc(ref.id).update({inicioEnd:end}); visitaAtiva.inicioEnd=end; renderVisitaAtiva(); });
+  }catch(e){ toast(e.message); }
+  $("btnIniciar").disabled=false; $("btnIniciar").textContent="📍 Iniciar deslocamento";
+};
+
+$("btnCheguei").onclick=async()=>{
+  if(!visitaAtiva) return;
+  $("btnCheguei").disabled=true; $("btnCheguei").textContent="Registrando chegada...";
+  try{
+    const pos = await pegarPosicao();
+    const agora=Date.now();
+    const desloc = Math.max(1,Math.round((agora-visitaAtiva.inicio)/60000));
+    await db.collection(COL_VISITAS).doc(visitaAtiva.id).update({
+      status:"em_visita", chegada:agora, chegadaLat:pos.lat, chegadaLng:pos.lng, tempoDeslocMin:desloc
+    });
+    Object.assign(visitaAtiva,{status:"em_visita",chegada:agora,chegadaLat:pos.lat,chegadaLng:pos.lng,tempoDeslocMin:desloc});
+    renderVisitaAtiva();
+    toast("Chegada registrada após "+fmtMin(desloc)+" de deslocamento.");
+    enderecoAprox(pos.lat,pos.lng).then(end=>{ db.collection(COL_VISITAS).doc(visitaAtiva.id).update({chegadaEnd:end}); if(visitaAtiva){visitaAtiva.chegadaEnd=end; renderVisitaAtiva();} });
+  }catch(e){ toast(e.message); }
+  $("btnCheguei").disabled=false; $("btnCheguei").textContent="✅ Cheguei ao local";
+};
+
+$("btnFinalizar").onclick=()=>{
+  if(!visitaAtiva) return;
+  $("modalPredio").textContent=visitaAtiva.predio;
+  $("fimTipo").value=visitaAtiva.tipo;
+  $("fimObs").value=visitaAtiva.observacoes||"";
+  $("sobreposicao").classList.add("aberto");
+};
+$("btnFecharModal").onclick=()=>$("sobreposicao").classList.remove("aberto");
+
+$("btnConfirmarFim").onclick=async()=>{
+  if(!visitaAtiva) return;
+  $("btnConfirmarFim").disabled=true;
+  try{
+    const agora=Date.now();
+    const tVisita = visitaAtiva.chegada ? Math.max(1,Math.round((agora-visitaAtiva.chegada)/60000)) : null;
+    await db.collection(COL_VISITAS).doc(visitaAtiva.id).update({
+      status:"finalizada", fim:agora, tempoVisitaMin:tVisita,
+      tipo:$("fimTipo").value, observacoes:$("fimObs").value.trim()
+    });
+    toast("Visita finalizada! ✅");
+    visitaAtiva=null;
+    $("sobreposicao").classList.remove("aberto");
+    renderVisitaAtiva(); carregarHoje();
+  }catch(e){ toast("Erro ao finalizar: "+e.message); }
+  $("btnConfirmarFim").disabled=false;
+};
+
+$("btnCancelar").onclick=async()=>{
+  if(!visitaAtiva) return;
+  if(!confirm("Cancelar esta visita? Ela não vai contar nos relatórios.")) return;
+  await db.collection(COL_VISITAS).doc(visitaAtiva.id).update({status:"cancelada",fim:Date.now()});
+  visitaAtiva=null; renderVisitaAtiva(); toast("Visita cancelada.");
+};
+
+function renderVisitaAtiva(){
+  pararCrono();
+  if(!visitaAtiva){
+    $("cartaoAtiva").classList.add("hidden");
+    $("cartaoNova").classList.remove("hidden");
+    return;
+  }
+  $("cartaoNova").classList.add("hidden");
+  $("cartaoAtiva").classList.remove("hidden");
+  $("ativaPredio").textContent=visitaAtiva.predio;
+  const emVisita = visitaAtiva.status==="em_visita";
+  const st=$("ativaStatus");
+  st.textContent = emVisita?"Em visita":"Em deslocamento";
+  st.className = "faixaStatus "+(emVisita?"visita":"desloc");
+  $("legendaCrono").textContent = emVisita?"tempo no local":"tempo de deslocamento";
+  $("btnCheguei").classList.toggle("hidden",emVisita);
+  $("btnFinalizar").classList.toggle("hidden",!emVisita);
+  let html = '<div class="infoLinha"><span class="rotulo">Tipo</span><span class="valor">'+escapaHTML(visitaAtiva.tipo)+'</span></div>'
+    +'<div class="infoLinha"><span class="rotulo">Saída</span><span class="valor">'+fmtHora(visitaAtiva.inicio)+(visitaAtiva.inicioEnd?" · "+escapaHTML(visitaAtiva.inicioEnd):"")+'</span></div>';
+  if(emVisita){
+    html+='<div class="infoLinha"><span class="rotulo">Chegada</span><span class="valor">'+fmtHora(visitaAtiva.chegada)+(visitaAtiva.chegadaEnd?" · "+escapaHTML(visitaAtiva.chegadaEnd):"")+'</span></div>'
+      +'<div class="infoLinha"><span class="rotulo">Deslocamento</span><span class="valor">'+fmtMin(visitaAtiva.tempoDeslocMin)+'</span></div>';
+  }
+  $("ativaInfo").innerHTML=html;
+  const base = emVisita?visitaAtiva.chegada:visitaAtiva.inicio;
+  const tick=()=>{
+    const s=Math.floor((Date.now()-base)/1000);
+    const h=Math.floor(s/3600), m=Math.floor((s%3600)/60), seg=s%60;
+    $("cronometro").textContent = h>0 ? (h+":"+String(m).padStart(2,"0")+":"+String(seg).padStart(2,"0")) : (String(m).padStart(2,"0")+":"+String(seg).padStart(2,"0"));
+  };
+  tick(); intervaloCrono=setInterval(tick,1000);
+}
+function pararCrono(){ if(intervaloCrono){clearInterval(intervaloCrono);intervaloCrono=null;} }
+
+/* ================= HOJE / HISTÓRICO ================= */
+function cardVisita(v,mostrarNome){
+  const rota = (v.inicioLat!=null&&v.chegadaLat!=null)
+    ? '<a class="linkMapa" target="_blank" href="https://www.google.com/maps/dir/'+v.inicioLat+','+v.inicioLng+'/'+v.chegadaLat+','+v.chegadaLng+'">Ver rota no mapa ↗</a>'
+    : (v.inicioLat!=null?'<a class="linkMapa" target="_blank" href="'+linkMaps(v.inicioLat,v.inicioLng)+'">Ver saída no mapa ↗</a>':"");
+  return '<div class="itemVisita"><div class="topo"><div><div class="predio">'+escapaHTML(v.predio)+'</div>'
+    +'<div class="meta">'+(mostrarNome?("<b>"+escapaHTML(v.nome)+"</b> ("+escapaHTML(v.funcao||"")+") · "):"")
+    +fmtData(v.inicio)+" · saída "+fmtHora(v.inicio)
+    +(v.chegada?(" · chegada "+fmtHora(v.chegada)):"")
+    +(v.fim?(" · fim "+fmtHora(v.fim)):"")
+    +'<br>Deslocamento: <b>'+fmtMin(v.tempoDeslocMin)+'</b> · Tempo no local: <b>'+fmtMin(v.tempoVisitaMin)+'</b>'
+    +(v.inicioEnd?('<br>De: '+escapaHTML(v.inicioEnd)):"")
+    +(v.chegadaEnd?('<br>Para: '+escapaHTML(v.chegadaEnd)):"")
+    +(v.observacoes?('<br>Obs: '+escapaHTML(v.observacoes)):"")
+    +'<br>'+rota+'</div></div>'
+    +'<span class="etiquetaTipo">'+escapaHTML(v.tipo)+'</span></div></div>';
+}
+
+async function carregarHoje(){
+  const hoje=diaISO(Date.now());
+  const snap=await db.collection(COL_VISITAS).where("uid","==",usuarioAtual.uid).get();
+  const vs=[]; snap.forEach(d=>{const v=d.data(); if(v.status==="finalizada"&&v.dataDia===hoje)vs.push(v);});
+  vs.sort((a,b)=>b.inicio-a.inicio);
+  $("listaHoje").className = vs.length?"":"vazio";
+  $("listaHoje").innerHTML = vs.length? vs.map(v=>cardVisita(v,false)).join("") : "Nenhuma visita finalizada hoje.";
+}
+
+async function carregarHistorico(){
+  $("listaHistorico").className="carregando"; $("listaHistorico").textContent="Carregando...";
+  const snap=await db.collection(COL_VISITAS).where("uid","==",usuarioAtual.uid).get();
+  const vs=[]; snap.forEach(d=>{const v=d.data(); if(v.status==="finalizada")vs.push(v);});
+  vs.sort((a,b)=>b.inicio-a.inicio);
+  $("listaHistorico").className = vs.length?"":"vazio";
+  $("listaHistorico").innerHTML = vs.length? vs.map(v=>cardVisita(v,false)).join("") : '<div class="iconeGrande">🗂️</div>Nenhuma visita finalizada ainda.<br>Inicie sua primeira visita na aba Visita!';
+}
+
+/* ================= DASHBOARD ================= */
+async function carregarPessoasFiltro(){
+  const sel=$("filtroPessoa");
+  if(sel.options.length>1) return;
+  const snap=await db.collection(COL_USUARIOS).get();
+  snap.forEach(d=>{const u=d.data(); if(u.excluido) return; const o=document.createElement("option"); o.value=d.id; o.textContent=u.nome+" ("+(u.funcao||"")+")"; sel.appendChild(o);});
+}
+$("btnAplicar").onclick=aplicarFiltros;
+
+async function aplicarFiltros(){
+  if(!ehAdmin()) return;
+  $("listaDash").className="carregando"; $("listaDash").textContent="Carregando...";
+  const de=$("filtroDe").value, ate=$("filtroAte").value;
+  let q=db.collection(COL_VISITAS);
+  if(de) q=q.where("dataDia",">=",de);
+  if(ate) q=q.where("dataDia","<=",ate);
+  const snap=await q.get();
+  let vs=[]; snap.forEach(d=>{const v=d.data(); if(v.status==="finalizada")vs.push({id:d.id,...v});});
+  const pessoa=$("filtroPessoa").value, tipo=$("filtroTipo").value, regiao=$("filtroRegiao").value;
+  if(pessoa) vs=vs.filter(v=>v.uid===pessoa);
+  if(tipo) vs=vs.filter(v=>v.tipo===tipo);
+  if(regiao) vs=vs.filter(v=>v.regiao===regiao);
+  vs.sort((a,b)=>b.inicio-a.inicio);
+  cacheDash=vs;
+  // números
+  $("numTotal").textContent=vs.length;
+  const ds=vs.filter(v=>v.tempoDeslocMin!=null), vi=vs.filter(v=>v.tempoVisitaMin!=null);
+  $("numDesloc").textContent = ds.length? Math.round(ds.reduce((s,v)=>s+v.tempoDeslocMin,0)/ds.length)+"m":"—";
+  $("numVisita").textContent = vi.length? Math.round(vi.reduce((s,v)=>s+v.tempoVisitaMin,0)/vi.length)+"m":"—";
+  // ranking
+  const porPessoa={};
+  vs.forEach(v=>{ if(!porPessoa[v.nome])porPessoa[v.nome]={total:0,tipos:{}}; porPessoa[v.nome].total++; porPessoa[v.nome].tipos[v.tipo]=(porPessoa[v.nome].tipos[v.tipo]||0)+1; });
+  const rank=Object.entries(porPessoa).sort((a,b)=>b[1].total-a[1].total);
+  $("tabelaRanking").innerHTML = rank.length
+    ? '<table class="tabelaRank"><tr><th>#</th><th>Nome</th><th>Visitas</th><th>Mais comum</th></tr>'
+      + rank.map((r,i)=>{ const top=Object.entries(r[1].tipos).sort((a,b)=>b[1]-a[1])[0];
+        return '<tr><td><span class="posRank">'+(i+1)+'</span></td><td><b>'+escapaHTML(r[0])+'</b></td><td>'+r[1].total+'</td><td>'+escapaHTML(top[0])+' ('+top[1]+')</td></tr>';}).join("")
+      +'</table>'
+    : '<div class="vazio">Sem visitas no período.</div>';
+  // lista
+  $("listaDash").className = vs.length?"":"vazio";
+  $("listaDash").innerHTML = vs.length? vs.map(v=>cardVisita(v,true)).join("") : "Nenhuma visita encontrada com esses filtros.";
+}
+
+/* ================= PDF ================= */
+$("btnPDF").onclick=()=>{
+  if(!cacheDash.length) return toast("Aplique os filtros primeiro — não há visitas para exportar.");
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({orientation:"landscape"});
+  doc.setFont("helvetica","bold"); doc.setFontSize(18); doc.setTextColor(123,47,190);
+  doc.text("Jornada Comercial — Relatório de Visitas",14,16);
+  doc.setFontSize(10); doc.setTextColor(90,90,90); doc.setFont("helvetica","normal");
+  const f=[];
+  f.push("Período: "+($("filtroDe").value||"início")+" a "+($("filtroAte").value||"hoje"));
+  if($("filtroPessoa").value) f.push("Pessoa: "+$("filtroPessoa").selectedOptions[0].textContent);
+  if($("filtroTipo").value) f.push("Tipo: "+$("filtroTipo").value);
+  if($("filtroRegiao").value) f.push("Região: "+$("filtroRegiao").value);
+  f.push("Gerado em "+new Date().toLocaleString("pt-BR")+" por "+usuarioAtual.nome);
+  doc.text(f.join("  |  "),14,23);
+  // ranking
+  const porPessoa={};
+  cacheDash.forEach(v=>{porPessoa[v.nome]=(porPessoa[v.nome]||0)+1;});
+  const rank=Object.entries(porPessoa).sort((a,b)=>b[1]-a[1]).map((r,i)=>[i+1,r[0],r[1]]);
+  doc.autoTable({startY:28, head:[["#","Nome","Total de visitas"]], body:rank,
+    headStyles:{fillColor:[123,47,190]}, styles:{fontSize:9}, theme:"grid", tableWidth:120});
+  // visitas
+  const linhas=cacheDash.map(v=>[
+    fmtData(v.inicio), v.nome, v.funcao||"", v.regiao||"", v.predio, v.tipo,
+    fmtHora(v.inicio), v.chegada?fmtHora(v.chegada):"—", v.fim?fmtHora(v.fim):"—",
+    fmtMin(v.tempoDeslocMin), fmtMin(v.tempoVisitaMin),
+    (v.inicioEnd||"")+(v.chegadaEnd?(" → "+v.chegadaEnd):""), v.observacoes||""
+  ]);
+  doc.autoTable({startY:doc.lastAutoTable.finalY+8,
+    head:[["Data","Nome","Função","Região","Prédio/Cliente","Tipo","Saída","Chegada","Fim","Desloc.","Visita","Trajeto","Obs."]],
+    body:linhas, headStyles:{fillColor:[232,74,26]}, styles:{fontSize:7.5,cellPadding:1.6}, theme:"grid",
+    columnStyles:{11:{cellWidth:50},12:{cellWidth:35}}});
+  doc.save("jornada-comercial_"+diaISO(Date.now())+".pdf");
+};
+
+/* ================= EQUIPE ================= */
+async function carregarEquipe(){
+  $("listaEquipe").className="carregando"; $("listaEquipe").textContent="Carregando...";
+  const snap=await db.collection(COL_USUARIOS).get();
+  const us=[]; snap.forEach(d=>{const u=d.data(); if(!u.excluido) us.push({uid:d.id,...u});});
+  const ordem={superadmin:0,admin:1,membro:2};
+  us.sort((a,b)=>(ordem[a.papel]??3)-(ordem[b.papel]??3)||a.nome.localeCompare(b.nome));
+  $("listaEquipe").className="";
+  $("listaEquipe").innerHTML = us.map(u=>{
+    const eu = u.uid===usuarioAtual.uid;
+    let acoes="";
+    if(!eu && u.papel!=="superadmin"){
+      if(u.papel==="membro" && ehAdmin()) acoes+='<button class="btnMini" onclick="mudarPapel(\''+u.uid+'\',\'admin\')">Promover a admin</button>';
+      if(u.papel==="admin" && ehSuper()) acoes+='<button class="btnMini" onclick="mudarPapel(\''+u.uid+'\',\'membro\')">Rebaixar</button>';
+      if(ehSuper()){
+        acoes+= u.ativo!==false
+          ? '<button class="btnMini perigo" onclick="alternarAtivo(\''+u.uid+'\',false)">Desativar</button>'
+          : '<button class="btnMini" onclick="alternarAtivo(\''+u.uid+'\',true)">Reativar</button>';
+        acoes+='<button class="btnMini perigo" onclick="excluirUsuario(\''+u.uid+'\',\''+escapaHTML(u.nome)+'\')">Excluir</button>';
+      }
+    }
+    return '<div class="itemUsuario"><div><div class="nome">'+escapaHTML(u.nome)+(eu?" (você)":"")+'</div>'
+      +'<div class="detalhe">'+escapaHTML(u.email)+' · '+escapaHTML(u.funcao||"")+' · '+escapaHTML(u.regiao||"")+'</div></div>'
+      +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">'
+      +'<span class="etiquetaPapel '+(u.ativo===false?"inativo":u.papel)+'">'+(u.ativo===false?"DESATIVADO":u.papel.toUpperCase())+'</span>'
+      +'<div class="acoesUsuario">'+acoes+'</div></div></div>';
+  }).join("");
+}
+window.mudarPapel=async(uid,papel)=>{
+  if(papel==="membro" && !ehSuper()) return toast("Apenas o superadmin pode rebaixar.");
+  await db.collection(COL_USUARIOS).doc(uid).update({papel});
+  toast(papel==="admin"?"Usuário promovido a admin.":"Usuário rebaixado a membro.");
+  carregarEquipe();
+};
+window.alternarAtivo=async(uid,ativo)=>{
+  if(!ehSuper()) return toast("Apenas o superadmin pode fazer isso.");
+  await db.collection(COL_USUARIOS).doc(uid).update({ativo});
+  toast(ativo?"Usuário reativado.":"Usuário desativado — não consegue mais entrar no app.");
+  carregarEquipe();
+};
+window.excluirUsuario=async(uid,nome)=>{
+  if(!ehSuper()) return toast("Apenas o superadmin pode excluir.");
+  if(!confirm("Excluir "+nome+"? Ele perde o acesso definitivamente. As visitas dele continuam no histórico.")) return;
+  await db.collection(COL_USUARIOS).doc(uid).update({ativo:false,papel:"membro",excluido:true});
+  toast("Usuário excluído — acesso bloqueado.");
+  carregarEquipe();
+};
+</script>
+</body>
+</html>
