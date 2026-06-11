@@ -187,6 +187,9 @@ label{display:block;font-size:13px;font-weight:600;color:var(--texto-suave);marg
       <select id="cadFuncao">
         <option value="Vendedor">Vendedor</option>
         <option value="Consultor">Consultor</option>
+        <option value="Coordenador">Coordenador</option>
+        <option value="Gerente">Gerente</option>
+        <option value="Gestor">Gestor</option>
       </select>
       <label>Região</label>
       <select id="cadRegiao">
@@ -344,6 +347,31 @@ label{display:block;font-size:13px;font-weight:600;color:var(--texto-suave);marg
     <textarea id="fimObs" rows="4" placeholder="Ex: Falei com o síndico, ficou de retornar semana que vem..."></textarea>
     <button class="btnAcao roxo" id="btnConfirmarFim">Confirmar e finalizar</button>
     <button class="btnAcao cinza" id="btnFecharModal">Voltar</button>
+  </div>
+</div>
+
+<!-- MODAL PERFIL -->
+<div id="sobrePerfil" style="position:fixed;inset:0;background:rgba(20,8,35,.55);z-index:60;display:none;align-items:center;justify-content:center;padding:20px">
+  <div class="modal" style="border-radius:22px;max-width:420px">
+    <h3>Meu perfil</h3>
+    <label>Nome</label>
+    <input type="text" id="perfNome">
+    <label>Função</label>
+    <select id="perfFuncao">
+      <option value="Vendedor">Vendedor</option>
+      <option value="Consultor">Consultor</option>
+      <option value="Coordenador">Coordenador</option>
+      <option value="Gerente">Gerente</option>
+      <option value="Gestor">Gestor</option>
+    </select>
+    <label>Região</label>
+    <select id="perfRegiao">
+      <option value="Recife">Recife</option>
+      <option value="Paraíba">Paraíba</option>
+      <option value="Alagoas">Alagoas</option>
+    </select>
+    <button class="btnAcao roxo" id="btnSalvarPerfil">Salvar</button>
+    <button class="btnAcao cinza" id="btnFecharPerfil">Voltar</button>
   </div>
 </div>
 
@@ -507,12 +535,21 @@ async function iniciarApp(){
   $("telaAuth").style.display="none";
   $("app").classList.remove("hidden");
   $("cabUsuario").innerHTML = escapaHTML(usuarioAtual.nome)+" · "+escapaHTML(usuarioAtual.funcao)+" · "+escapaHTML(usuarioAtual.regiao)+(ehSuper()?" · SUPERADMIN":(ehAdmin()?" · ADMIN":""))+' <span id="btnEditarNome" style="cursor:pointer;text-decoration:underline">✏️ editar</span>';
-  $("btnEditarNome").onclick=async()=>{
-    const novoNome = prompt("Como você quer aparecer no app?", usuarioAtual.nome);
-    if(!novoNome||!novoNome.trim()) return;
-    await db.collection(COL_USUARIOS).doc(usuarioAtual.uid).update({nome:novoNome.trim()});
-    usuarioAtual.nome=novoNome.trim();
-    toast("Nome atualizado!");
+  $("btnEditarNome").onclick=()=>{
+    $("perfNome").value=usuarioAtual.nome;
+    $("perfFuncao").value=usuarioAtual.funcao||"Consultor";
+    $("perfRegiao").value=usuarioAtual.regiao||"Recife";
+    $("sobrePerfil").style.display="flex";
+  };
+  $("btnFecharPerfil").onclick=()=>$("sobrePerfil").style.display="none";
+  $("btnSalvarPerfil").onclick=async()=>{
+    const nome=$("perfNome").value.trim();
+    if(!nome) return toast("Informe um nome.");
+    const funcao=$("perfFuncao").value, regiao=$("perfRegiao").value;
+    await db.collection(COL_USUARIOS).doc(usuarioAtual.uid).update({nome,funcao,regiao});
+    Object.assign(usuarioAtual,{nome,funcao,regiao});
+    $("sobrePerfil").style.display="none";
+    toast("Perfil atualizado!");
     iniciarApp();
   };
   document.querySelectorAll(".adminSo").forEach(el=>el.classList.toggle("hidden",!ehAdmin()));
