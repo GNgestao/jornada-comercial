@@ -22,6 +22,32 @@
   --raio:16px;
   --sombra:0 2px 12px rgba(60,30,100,.08);
 }
+body.escuro{
+  --fundo:#171221;
+  --card:#231B33;
+  --texto:#F0EBF8;
+  --texto-suave:#A99FBC;
+  --borda:#3A2F52;
+  --sombra:0 2px 12px rgba(0,0,0,.35);
+}
+body.escuro input,body.escuro select,body.escuro textarea{background:#1B1428;color:var(--texto);border-color:var(--borda)}
+body.escuro .navInferior{background:#1E1730;border-top-color:var(--borda)}
+body.escuro .modal{background:#231B33}
+body.escuro .cartaoAuth{background:#231B33}
+body.escuro .btnAcao.cinza{background:#2E2444;color:#C9A8F0}
+body.escuro .btnMini{background:#2E2444;color:#C9A8F0}
+body.escuro .btnMini.perigo{background:#3D1E24;color:#FF8A8A}
+body.escuro .btnAcao.vermelhoClaro{background:#3D1E24;color:#FF8A8A}
+body.escuro .faixaStatus.desloc{background:#321F4D;color:#C9A8F0}
+body.escuro .faixaStatus.visita{background:#42261A;color:#FFA07A}
+body.escuro .faixaStatus.fim{background:#163826;color:#6FD89E}
+body.escuro .etiquetaTipo{background:#321F4D;color:#C9A8F0}
+body.escuro .etiquetaPapel.membro{background:#321F4D;color:#C9A8F0}
+body.escuro .etiquetaPapel.admin{background:#42261A;color:#FFA07A}
+body.escuro .etiquetaPapel.inativo{background:#333;color:#999}
+body.escuro .msgErro{background:#3D1E24;color:#FF8A8A}
+body.escuro .msgOk{background:#163826;color:#6FD89E}
+body.escuro #toast{background:#F0EBF8;color:#171221}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{font-family:'Inter',sans-serif;background:var(--fundo);color:var(--texto);min-height:100vh;font-size:15px}
 h1,h2,h3,.display{font-family:'Sora',sans-serif}
@@ -189,7 +215,7 @@ label{display:block;font-size:13px;font-weight:600;color:var(--texto-suave);marg
         <div class="marca">Jornada Comercial</div>
         <div class="usuario" id="cabUsuario"></div>
       </div>
-      <button class="btnSair" id="btnSair">Sair</button>
+      <div style="display:flex;gap:8px"><button class="btnSair" id="btnTema" title="Alternar tema">🌙</button><button class="btnSair" id="btnSair">Sair</button></div>
     </div>
   </div>
 
@@ -350,6 +376,7 @@ let usuarioAtual = null;     // doc do jc_usuarios
 let visitaAtiva = null;      // {id, ...dados}
 let intervaloCrono = null;
 let cacheDash = [];          // visitas carregadas no dashboard
+let cadastroPendente = null; // dados do formulário de cadastro (evita corrida)
 
 /* ================= HELPERS ================= */
 const $ = id => document.getElementById(id);
@@ -406,6 +433,7 @@ $("btnCadastrar").onclick=async()=>{
   const funcao=$("cadFuncao").value, regiao=$("cadRegiao").value;
   if(!nome||!email||!senha) return erroAuth("Preencha todos os campos.");
   $("btnCadastrar").disabled=true;
+  cadastroPendente = {nome, funcao, regiao};
   try{
     const cred = await auth.createUserWithEmailAndPassword(email,senha);
     const papel = (email.toLowerCase()===SUPERADMIN_EMAIL) ? "superadmin" : "membro";
@@ -414,7 +442,7 @@ $("btnCadastrar").onclick=async()=>{
       criadoEm: firebase.firestore.FieldValue.serverTimestamp()
     });
     okAuth("Conta criada!");
-  }catch(e){ erroAuth(traduzErro(e)); }
+  }catch(e){ erroAuth(traduzErro(e)); cadastroPendente=null; }
   $("btnCadastrar").disabled=false;
 };
 
@@ -430,6 +458,15 @@ function traduzErro(e){
 
 $("btnSair").onclick=()=>auth.signOut();
 
+/* ===== TEMA CLARO/ESCURO ===== */
+function aplicarTema(t){
+  document.body.classList.toggle("escuro", t==="escuro");
+  $("btnTema").textContent = t==="escuro" ? "☀️" : "🌙";
+  try{ localStorage.setItem("jc_tema", t); }catch(e){}
+}
+$("btnTema").onclick=()=>aplicarTema(document.body.classList.contains("escuro")?"claro":"escuro");
+try{ aplicarTema(localStorage.getItem("jc_tema")||"claro"); }catch(e){ aplicarTema("claro"); }
+
 auth.onAuthStateChanged(async user=>{
   if(!user){
     usuarioAtual=null; pararCrono();
@@ -440,10 +477,16 @@ auth.onAuthStateChanged(async user=>{
   const ref = db.collection(COL_USUARIOS).doc(user.uid);
   let doc = await ref.get();
   if(!doc.exists){
-    const papel = (user.email.toLowerCase()===SUPERADMIN_EMAIL) ? "superadmin" : "membro";
-    await ref.set({nome:user.email.split("@")[0], email:user.email.toLowerCase(), funcao:"Consultor", regiao:"Recife", papel, ativo:true,
-      criadoEm: firebase.firestore.FieldValue.serverTimestamp()});
-    doc = await ref.get();
+    // se acabou de se cadastrar, espera o cadastro gravar o doc (evita sobrescrever o nome)
+    if(cadastroPendente){ await new Promise(r=>setTimeout(r,1500)); doc = await ref.get(); }
+    if(!doc.exists){
+      const papel = (user.email.toLowerCase()===SUPERADMIN_EMAIL) ? "superadmin" : "membro";
+      const p = cadastroPendente||{};
+      await ref.set({nome:p.nome||user.email.split("@")[0], email:user.email.toLowerCase(), funcao:p.funcao||"Consultor", regiao:p.regiao||"Recife", papel, ativo:true,
+        criadoEm: firebase.firestore.FieldValue.serverTimestamp()});
+      doc = await ref.get();
+    }
+    cadastroPendente=null;
   }
   usuarioAtual = {uid:user.uid, ...doc.data()};
   if(usuarioAtual.email===SUPERADMIN_EMAIL && usuarioAtual.papel!=="superadmin"){
@@ -463,7 +506,15 @@ function ehSuper(){ return usuarioAtual && usuarioAtual.papel==="superadmin"; }
 async function iniciarApp(){
   $("telaAuth").style.display="none";
   $("app").classList.remove("hidden");
-  $("cabUsuario").textContent = usuarioAtual.nome+" · "+usuarioAtual.funcao+" · "+usuarioAtual.regiao+(ehSuper()?" · SUPERADMIN":(ehAdmin()?" · ADMIN":""));
+  $("cabUsuario").innerHTML = escapaHTML(usuarioAtual.nome)+" · "+escapaHTML(usuarioAtual.funcao)+" · "+escapaHTML(usuarioAtual.regiao)+(ehSuper()?" · SUPERADMIN":(ehAdmin()?" · ADMIN":""))+' <span id="btnEditarNome" style="cursor:pointer;text-decoration:underline">✏️ editar</span>';
+  $("btnEditarNome").onclick=async()=>{
+    const novoNome = prompt("Como você quer aparecer no app?", usuarioAtual.nome);
+    if(!novoNome||!novoNome.trim()) return;
+    await db.collection(COL_USUARIOS).doc(usuarioAtual.uid).update({nome:novoNome.trim()});
+    usuarioAtual.nome=novoNome.trim();
+    toast("Nome atualizado!");
+    iniciarApp();
+  };
   document.querySelectorAll(".adminSo").forEach(el=>el.classList.toggle("hidden",!ehAdmin()));
   // datas padrão dashboard: mês atual
   const hoje=new Date();
