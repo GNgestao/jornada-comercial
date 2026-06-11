@@ -233,12 +233,14 @@ label{display:block;font-size:13px;font-weight:600;color:var(--texto-suave);marg
         <input type="text" id="visPredio" placeholder="Ex: Edf. Maria Eduarda">
         <label>Tipo da visita</label>
         <select id="visTipo">
-          <option value="Primeira Contratação">Primeira Contratação</option>
-          <option value="Resgate">Resgate</option>
-          <option value="Captação">Captação</option>
-          <option value="Renegociação">Renegociação</option>
-          <option value="Visita Periódica">Visita Periódica</option>
-          <option value="Outros">Outros</option>
+      <option value="Primeira Contratação">Primeira Contratação</option>
+      <option value="Resgate">Resgate</option>
+      <option value="Captação">Captação</option>
+      <option value="Renegociação">Renegociação</option>
+      <option value="Visita Periódica">Visita Periódica</option>
+      <option value="Proposta de Reparo">Proposta de Reparo</option>
+      <option value="Proposta de Peça">Proposta de Peça</option>
+      <option value="Outros">Outros</option>
         </select>
         <button class="btnAcao roxo" id="btnIniciar">📍 Iniciar deslocamento</button>
         <div class="subtitulo" style="margin-top:10px;text-align:center">Sua localização de saída será registrada automaticamente.</div>
@@ -282,7 +284,8 @@ label{display:block;font-size:13px;font-weight:600;color:var(--texto-suave);marg
           <div><label>Tipo</label><select id="filtroTipo">
             <option value="">Todos</option>
             <option>Primeira Contratação</option><option>Resgate</option><option>Captação</option>
-            <option>Renegociação</option><option>Visita Periódica</option><option>Outros</option>
+            <option>Renegociação</option><option>Visita Periódica</option>
+            <option>Proposta de Reparo</option><option>Proposta de Peça</option><option>Outros</option>
           </select></div>
           <div><label>Região</label><select id="filtroRegiao">
             <option value="">Todas</option><option>Recife</option><option>Paraíba</option><option>Alagoas</option>
@@ -296,6 +299,18 @@ label{display:block;font-size:13px;font-weight:600;color:var(--texto-suave);marg
         <div class="cartaoNumero"><div class="num" id="numTotal">0</div><div class="rot">Visitas</div></div>
         <div class="cartaoNumero"><div class="num" id="numDesloc">0m</div><div class="rot">Médio deslocamento</div></div>
         <div class="cartaoNumero"><div class="num" id="numVisita">0m</div><div class="rot">Médio em visita</div></div>
+      </div>
+
+      <div class="cartao">
+        <div class="tituloSecao">📈 Produtividade por tipo</div>
+        <div class="subtitulo" style="margin-bottom:8px">Como o período filtrado foi distribuído entre os tipos de visita.</div>
+        <div id="tabelaProdutividade"></div>
+      </div>
+
+      <div class="cartao">
+        <div class="tituloSecao">🎯 Resultados</div>
+        <div class="subtitulo" style="margin-bottom:8px">Quantas visitas terminaram em negócio fechado, proposta, retorno...</div>
+        <div id="tabelaResultados"></div>
       </div>
 
       <div class="cartao">
@@ -341,10 +356,35 @@ label{display:block;font-size:13px;font-weight:600;color:var(--texto-suave);marg
       <option value="Captação">Captação</option>
       <option value="Renegociação">Renegociação</option>
       <option value="Visita Periódica">Visita Periódica</option>
+      <option value="Proposta de Reparo">Proposta de Reparo</option>
+      <option value="Proposta de Peça">Proposta de Peça</option>
       <option value="Outros">Outros</option>
     </select>
+    <label>Resultado da visita</label>
+    <select id="fimResultado">
+      <option value="Fechou negócio">Fechou negócio ✅</option>
+      <option value="Proposta enviada">Proposta enviada</option>
+      <option value="Em negociação">Em negociação</option>
+      <option value="Retorno agendado">Retorno agendado</option>
+      <option value="Sem interesse">Sem interesse</option>
+      <option value="Outro">Outro</option>
+    </select>
+    <label>Número da proposta (se houver)</label>
+    <input type="text" id="fimPropostaNum" placeholder="Ex: PROP-2026-0145">
+    <label>Proposta feita em campo ou remota?</label>
+    <select id="fimPropostaOrigem">
+      <option value="">Não se aplica</option>
+      <option value="Em campo">Em campo</option>
+      <option value="Remota">Remota</option>
+    </select>
+    <label>Com quem você falou? (nome)</label>
+    <input type="text" id="fimContatoNome" placeholder="Ex: Maria Souza">
+    <label>Função da pessoa</label>
+    <input type="text" id="fimContatoFuncao" placeholder="Ex: Síndica, Zelador, Administradora...">
+    <label>Celular da pessoa</label>
+    <input type="tel" id="fimContatoFone" placeholder="Ex: (81) 99999-9999">
     <label>Observações</label>
-    <textarea id="fimObs" rows="4" placeholder="Ex: Falei com o síndico, ficou de retornar semana que vem..."></textarea>
+    <textarea id="fimObs" rows="7" placeholder="Conte como foi a visita: o que foi conversado, próximos passos, prazos combinados..."></textarea>
     <button class="btnAcao roxo" id="btnConfirmarFim">Confirmar e finalizar</button>
     <button class="btnAcao cinza" id="btnFecharModal">Voltar</button>
   </div>
@@ -632,6 +672,12 @@ $("btnFinalizar").onclick=()=>{
   $("modalPredio").textContent=visitaAtiva.predio;
   $("fimTipo").value=visitaAtiva.tipo;
   $("fimObs").value=visitaAtiva.observacoes||"";
+  $("fimResultado").value=visitaAtiva.resultado||"Em negociação";
+  $("fimPropostaNum").value=visitaAtiva.propostaNum||"";
+  $("fimPropostaOrigem").value=visitaAtiva.propostaOrigem||"";
+  $("fimContatoNome").value=visitaAtiva.contatoNome||"";
+  $("fimContatoFuncao").value=visitaAtiva.contatoFuncao||"";
+  $("fimContatoFone").value=visitaAtiva.contatoFone||"";
   $("sobreposicao").classList.add("aberto");
 };
 $("btnFecharModal").onclick=()=>$("sobreposicao").classList.remove("aberto");
@@ -644,7 +690,13 @@ $("btnConfirmarFim").onclick=async()=>{
     const tVisita = visitaAtiva.chegada ? Math.max(1,Math.round((agora-visitaAtiva.chegada)/60000)) : null;
     await db.collection(COL_VISITAS).doc(visitaAtiva.id).update({
       status:"finalizada", fim:agora, tempoVisitaMin:tVisita,
-      tipo:$("fimTipo").value, observacoes:$("fimObs").value.trim()
+      tipo:$("fimTipo").value, observacoes:$("fimObs").value.trim(),
+      resultado:$("fimResultado").value,
+      propostaNum:$("fimPropostaNum").value.trim(),
+      propostaOrigem:$("fimPropostaOrigem").value,
+      contatoNome:$("fimContatoNome").value.trim(),
+      contatoFuncao:$("fimContatoFuncao").value.trim(),
+      contatoFone:$("fimContatoFone").value.trim()
     });
     toast("Visita finalizada! ✅");
     visitaAtiva=null;
@@ -708,6 +760,8 @@ function cardVisita(v,mostrarNome){
     +'<br>Deslocamento: <b>'+fmtMin(v.tempoDeslocMin)+'</b> · Tempo no local: <b>'+fmtMin(v.tempoVisitaMin)+'</b>'
     +(v.inicioEnd?('<br>De: '+escapaHTML(v.inicioEnd)):"")
     +(v.chegadaEnd?('<br>Para: '+escapaHTML(v.chegadaEnd)):"")
+    +(v.resultado?('<br>Resultado: <b>'+escapaHTML(v.resultado)+'</b>'+(v.propostaNum?(' · Proposta nº '+escapaHTML(v.propostaNum)):"")+(v.propostaOrigem?(' ('+escapaHTML(v.propostaOrigem)+')'):"")):"")
+    +(v.contatoNome?('<br>Falou com: <b>'+escapaHTML(v.contatoNome)+'</b>'+(v.contatoFuncao?(' ('+escapaHTML(v.contatoFuncao)+')'):"")+(v.contatoFone?(' · '+escapaHTML(v.contatoFone)):"")):"")
     +(v.observacoes?('<br>Obs: '+escapaHTML(v.observacoes)):"")
     +'<br>'+rota+'</div></div>'
     +'<span class="etiquetaTipo">'+escapaHTML(v.tipo)+'</span></div></div>';
@@ -760,6 +814,30 @@ async function aplicarFiltros(){
   const ds=vs.filter(v=>v.tempoDeslocMin!=null), vi=vs.filter(v=>v.tempoVisitaMin!=null);
   $("numDesloc").textContent = ds.length? Math.round(ds.reduce((s,v)=>s+v.tempoDeslocMin,0)/ds.length)+"m":"—";
   $("numVisita").textContent = vi.length? Math.round(vi.reduce((s,v)=>s+v.tempoVisitaMin,0)/vi.length)+"m":"—";
+  // produtividade por tipo
+  const porTipo={};
+  let totalTempoVisita=0;
+  vs.forEach(v=>{
+    if(!porTipo[v.tipo]) porTipo[v.tipo]={qtd:0,tempo:0};
+    porTipo[v.tipo].qtd++;
+    porTipo[v.tipo].tempo+=(v.tempoVisitaMin||0);
+    totalTempoVisita+=(v.tempoVisitaMin||0);
+  });
+  const tiposOrd=Object.entries(porTipo).sort((a,b)=>b[1].qtd-a[1].qtd);
+  $("tabelaProdutividade").innerHTML = tiposOrd.length
+    ? '<table class="tabelaRank"><tr><th>Tipo</th><th>Visitas</th><th>% visitas</th><th>Tempo</th><th>% tempo</th></tr>'
+      + tiposOrd.map(t=>'<tr><td><b>'+escapaHTML(t[0])+'</b></td><td>'+t[1].qtd+'</td><td><b>'+Math.round(t[1].qtd/vs.length*100)+'%</b></td><td>'+fmtMin(t[1].tempo)+'</td><td>'+(totalTempoVisita?Math.round(t[1].tempo/totalTempoVisita*100):0)+'%</td></tr>').join("")
+      +'</table>'
+    : '<div class="vazio">Sem visitas no período.</div>';
+  // resultados
+  const porResultado={};
+  vs.forEach(v=>{ const r=v.resultado||"Não informado"; porResultado[r]=(porResultado[r]||0)+1; });
+  const resOrd=Object.entries(porResultado).sort((a,b)=>b[1]-a[1]);
+  $("tabelaResultados").innerHTML = resOrd.length
+    ? '<table class="tabelaRank"><tr><th>Resultado</th><th>Visitas</th><th>%</th></tr>'
+      + resOrd.map(r=>'<tr><td><b>'+escapaHTML(r[0])+'</b></td><td>'+r[1]+'</td><td><b>'+Math.round(r[1]/vs.length*100)+'%</b></td></tr>').join("")
+      +'</table>'
+    : '<div class="vazio">Sem visitas no período.</div>';
   // ranking
   const porPessoa={};
   vs.forEach(v=>{ if(!porPessoa[v.nome])porPessoa[v.nome]={total:0,tipos:{}}; porPessoa[v.nome].total++; porPessoa[v.nome].tipos[v.tipo]=(porPessoa[v.nome].tipos[v.tipo]||0)+1; });
@@ -790,23 +868,62 @@ $("btnPDF").onclick=()=>{
   if($("filtroRegiao").value) f.push("Região: "+$("filtroRegiao").value);
   f.push("Gerado em "+new Date().toLocaleString("pt-BR")+" por "+usuarioAtual.nome);
   doc.text(f.join("  |  "),14,23);
+  // produtividade por tipo
+  const porTipo={};
+  let totalTempoVisita=0;
+  vs.forEach(v=>{
+    if(!porTipo[v.tipo]) porTipo[v.tipo]={qtd:0,tempo:0};
+    porTipo[v.tipo].qtd++;
+    porTipo[v.tipo].tempo+=(v.tempoVisitaMin||0);
+    totalTempoVisita+=(v.tempoVisitaMin||0);
+  });
+  const tiposOrd=Object.entries(porTipo).sort((a,b)=>b[1].qtd-a[1].qtd);
+  $("tabelaProdutividade").innerHTML = tiposOrd.length
+    ? '<table class="tabelaRank"><tr><th>Tipo</th><th>Visitas</th><th>% visitas</th><th>Tempo</th><th>% tempo</th></tr>'
+      + tiposOrd.map(t=>'<tr><td><b>'+escapaHTML(t[0])+'</b></td><td>'+t[1].qtd+'</td><td><b>'+Math.round(t[1].qtd/vs.length*100)+'%</b></td><td>'+fmtMin(t[1].tempo)+'</td><td>'+(totalTempoVisita?Math.round(t[1].tempo/totalTempoVisita*100):0)+'%</td></tr>').join("")
+      +'</table>'
+    : '<div class="vazio">Sem visitas no período.</div>';
+  // resultados
+  const porResultado={};
+  vs.forEach(v=>{ const r=v.resultado||"Não informado"; porResultado[r]=(porResultado[r]||0)+1; });
+  const resOrd=Object.entries(porResultado).sort((a,b)=>b[1]-a[1]);
+  $("tabelaResultados").innerHTML = resOrd.length
+    ? '<table class="tabelaRank"><tr><th>Resultado</th><th>Visitas</th><th>%</th></tr>'
+      + resOrd.map(r=>'<tr><td><b>'+escapaHTML(r[0])+'</b></td><td>'+r[1]+'</td><td><b>'+Math.round(r[1]/vs.length*100)+'%</b></td></tr>').join("")
+      +'</table>'
+    : '<div class="vazio">Sem visitas no período.</div>';
   // ranking
   const porPessoa={};
   cacheDash.forEach(v=>{porPessoa[v.nome]=(porPessoa[v.nome]||0)+1;});
   const rank=Object.entries(porPessoa).sort((a,b)=>b[1]-a[1]).map((r,i)=>[i+1,r[0],r[1]]);
   doc.autoTable({startY:28, head:[["#","Nome","Total de visitas"]], body:rank,
     headStyles:{fillColor:[123,47,190]}, styles:{fontSize:9}, theme:"grid", tableWidth:120});
+  // produtividade por tipo
+  const pTipo={}; let pTempoTotal=0;
+  cacheDash.forEach(v=>{ if(!pTipo[v.tipo])pTipo[v.tipo]={qtd:0,tempo:0}; pTipo[v.tipo].qtd++; pTipo[v.tipo].tempo+=(v.tempoVisitaMin||0); pTempoTotal+=(v.tempoVisitaMin||0); });
+  const pLinhas=Object.entries(pTipo).sort((a,b)=>b[1].qtd-a[1].qtd)
+    .map(t=>[t[0], t[1].qtd, Math.round(t[1].qtd/cacheDash.length*100)+"%", fmtMin(t[1].tempo), (pTempoTotal?Math.round(t[1].tempo/pTempoTotal*100):0)+"%"]);
+  doc.autoTable({startY:doc.lastAutoTable.finalY+8, head:[["Tipo de visita","Visitas","% visitas","Tempo no local","% tempo"]],
+    body:pLinhas, headStyles:{fillColor:[123,47,190]}, styles:{fontSize:9}, theme:"grid", tableWidth:160});
+  // resultados
+  const pRes={};
+  cacheDash.forEach(v=>{ const r=v.resultado||"Não informado"; pRes[r]=(pRes[r]||0)+1; });
+  const rLinhas=Object.entries(pRes).sort((a,b)=>b[1]-a[1]).map(r=>[r[0], r[1], Math.round(r[1]/cacheDash.length*100)+"%"]);
+  doc.autoTable({startY:doc.lastAutoTable.finalY+8, head:[["Resultado","Visitas","%"]],
+    body:rLinhas, headStyles:{fillColor:[123,47,190]}, styles:{fontSize:9}, theme:"grid", tableWidth:120});
   // visitas
   const linhas=cacheDash.map(v=>[
     fmtData(v.inicio), v.nome, v.funcao||"", v.regiao||"", v.predio, v.tipo,
     fmtHora(v.inicio), v.chegada?fmtHora(v.chegada):"—", v.fim?fmtHora(v.fim):"—",
     fmtMin(v.tempoDeslocMin), fmtMin(v.tempoVisitaMin),
-    (v.inicioEnd||"")+(v.chegadaEnd?(" → "+v.chegadaEnd):""), v.observacoes||""
+    (v.resultado||"")+(v.propostaNum?(" · "+v.propostaNum):"")+(v.propostaOrigem?(" ("+v.propostaOrigem+")"):""),
+    v.contatoNome?(v.contatoNome+(v.contatoFuncao?(" ("+v.contatoFuncao+")"):"")+(v.contatoFone?(" "+v.contatoFone):"")):"",
+    v.observacoes||""
   ]);
   doc.autoTable({startY:doc.lastAutoTable.finalY+8,
-    head:[["Data","Nome","Função","Região","Prédio/Cliente","Tipo","Saída","Chegada","Fim","Desloc.","Visita","Trajeto","Obs."]],
-    body:linhas, headStyles:{fillColor:[232,74,26]}, styles:{fontSize:7.5,cellPadding:1.6}, theme:"grid",
-    columnStyles:{11:{cellWidth:50},12:{cellWidth:35}}});
+    head:[["Data","Nome","Função","Região","Prédio/Cliente","Tipo","Saída","Chegada","Fim","Desloc.","Visita","Resultado","Contato","Obs."]],
+    body:linhas, headStyles:{fillColor:[232,74,26]}, styles:{fontSize:7,cellPadding:1.5}, theme:"grid",
+    columnStyles:{11:{cellWidth:32},12:{cellWidth:34},13:{cellWidth:48}}});
   doc.save("jornada-comercial_"+diaISO(Date.now())+".pdf");
 };
 
